@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>របាយការណ៍ថែទាំផ្ទៃពោះ · ANC Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Moul&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--ink:#16302b;--mut:#5d736e;--bg:#f3f6f1;--card:#fff;--line:#d9e2dc;--brand:#0d6b5c;--brand2:#0a5246;
+  --g:#2e9e5b;--gbg:#e6f5ec;--y:#c79a00;--ybg:#fdf5d3;--r:#c8372d;--rbg:#fde8e5}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Kantumruy Pro','Noto Sans Khmer',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
+header{background:var(--brand);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+header img{width:44px;height:44px;border-radius:50%;background:#fff;object-fit:contain}
+header h1{font-family:'Moul','Kantumruy Pro',serif;font-weight:400;font-size:16px;margin:0;line-height:1.7}
+header small{display:block;opacity:.85;font-size:12px}
+header .sp{flex:1}
+.lang{background:transparent;border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:6px;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+nav{display:flex;background:var(--brand2)}
+nav button{flex:1;background:none;border:0;color:#cfe5df;padding:10px;font:inherit;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+nav button.on{color:#fff;border-bottom-color:#f2c94c}
+main{max-width:860px;margin:0 auto;padding:14px}
+.banner{padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:10px;display:none}
+.banner.warn{background:var(--ybg);border:1px solid #ecd98a;display:block}
+.banner.info{background:#e3f0fb;border:1px solid #b5d3ee;display:block}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+section.card h2{font-size:15px;margin:0 0 10px;color:var(--brand2);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tot{background:var(--brand);color:#fff;border-radius:20px;padding:1px 12px;font-size:14px;font-weight:700;min-width:44px;text-align:center}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.grid.w{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut)}
+label b.req{color:var(--r)}
+input,select,textarea{width:100%;margin-top:3px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;color:var(--ink);background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px}
+input.num{text-align:center;font-weight:700;font-size:17px}
+.cg input{background:var(--gbg);border-color:#a9dcbd}.cy input{background:var(--ybg);border-color:#ecd98a}.cr input{background:var(--rbg);border-color:#f0b5af}
+.cg{color:var(--g)}.cy{color:var(--y)}.cr{color:var(--r)}
+.lvl{border:1px solid var(--line);border-radius:10px;padding:10px}
+.lvl h3{margin:0 0 6px;font-size:14px;text-align:center}
+.lvl label{margin-bottom:6px}
+.hint{font-size:12.5px;margin-top:8px;color:var(--r);display:none}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button.b{border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
+button.b.alt{background:#fff;color:var(--brand2);border:1px solid var(--brand)}
+button.b.sm{padding:4px 9px;font-size:12.5px}
+button.b.del{background:#fff;color:var(--r);border:1px solid var(--r)}
+.stats{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));margin-bottom:12px}
+.stat{background:#fff;border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:8px;padding:8px 10px}
+.stat b{display:block;font-size:22px;line-height:1.2}.stat span{font-size:12px;color:var(--mut)}
+.stat.g{border-left-color:var(--g)}.stat.y{border-left-color:var(--y)}.stat.r{border-left-color:var(--r)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:center}
+th{background:#eaf1ec;color:var(--brand2)}td.l,th.l{text-align:left}
+.pend{font-size:11px;background:var(--ybg);border-radius:10px;padding:0 6px;margin-left:4px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#16302b;color:#fff;padding:9px 18px;border-radius:22px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+.hide{display:none}
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:18mm}
+  body{background:#fff}
+  header,nav,main,#toast{display:none!important}
+  #printArea{display:block;font-family:'Kantumruy Pro','Noto Sans Khmer',sans-serif;font-size:13pt;color:#000;line-height:2}
+  #printArea h1{font-family:'Moul',serif;font-weight:400;font-size:15pt;text-align:center;margin:0 0 6pt}
+  #printArea .hd{font-family:'Moul',serif;font-size:11.5pt}
+  #printArea table{white-space:normal;font-size:12pt;margin:6pt 0}
+  #printArea th,#printArea td{border:1px solid #000;padding:6pt 10pt;text-align:left;background:none;color:#000;vertical-align:top}
+  #printArea th{text-align:center}
+  #printArea ul{margin:0 0 0 14pt;padding-left:14pt}
+  #printArea .v{display:inline-block;min-width:46pt;border-bottom:1px dotted #000;text-align:center;font-weight:700;padding:0 6pt}
+  #printArea .sig{margin-top:22pt;margin-left:55%;text-align:center}
+}
+</style>
+</head>
+<body>
+<header>
+  <img id="logo" alt="" src="">
+  <div><h1 data-en="Antenatal Care (ANC) Report">របាយការណ៍ថែទាំផ្ទៃពោះ</h1><small id="hdSub"></small></div>
+  <div class="sp"></div>
+  <button class="lang" id="langBtn">EN</button>
+</header>
+<nav>
+  <button id="tabForm" class="on" data-en="Form">បំពេញរបាយការណ៍</button>
+  <button id="tabDash" data-en="Dashboard">ផ្ទាំងទិន្នន័យ</button>
+</nav>
+
+<main>
+<div id="cfgBanner" class="banner"></div>
+<div id="outBanner" class="banner"></div>
+
+<!-- ============ FORM ============ -->
+<div id="viewForm">
+<form id="f" autocomplete="off">
+  <section class="card">
+    <h2><span data-en="Reporting unit">អង្គភាពរាយការណ៍</span></h2>
+    <div class="grid w">
+      <label><span data-en="Provincial Health Department">មន្ទីរសុខាភិបាលខេត្ត</span><input name="phd"></label>
+      <label><span data-en="Operational District">ស្រុកប្រតិបត្តិ</span> <b class="req">*</b><input name="od" list="odList" required></label>
+      <label><span data-en="Health facility">មូលដ្ឋានសុខាភិបាល</span> <b class="req">*</b><input name="facility" required></label>
+      <label><span data-en="Reporting month">ខែរាយការណ៍</span> <b class="req">*</b><input type="month" name="period" required></label>
+    </div>
+    <datalist id="odList"></datalist>
+  </section>
+
+  <section class="card">
+    <h2><span data-en="Total ANC visits">ថែទាំផ្ទៃពោះសរុប ANC</span><span class="tot" id="t_anc">0</span></h2>
+    <div class="grid">
+      <label>ANC 1<input class="num" name="anc1" inputmode="numeric"></label>
+      <label>ANC 2<input class="num" name="anc2" inputmode="numeric"></label>
+      <label>ANC 3<input class="num" name="anc3" inputmode="numeric"></label>
+      <label>ANC 4<input class="num" name="anc4" inputmode="numeric"></label>
+      <label><span data-en="Outside schedule">ក្រៅការកំណត់</span><input class="num" name="ancOut" inputmode="numeric"></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span data-en="Colour code">កូដពណ៌</span><span class="tot" id="t_col">0</span></h2>
+    <div class="grid">
+      <label class="cg"><span data-en="Green">បៃតង</span><input class="num" name="green" inputmode="numeric"></label>
+      <label class="cy"><span data-en="Yellow">លឿង</span><input class="num" name="yellow" inputmode="numeric"></label>
+      <label class="cr"><span data-en="Red">ក្រហម</span><input class="num" name="red" inputmode="numeric"></label>
+    </div>
+    <div class="hint" id="colHint"></div>
+  </section>
+
+  <section class="card">
+    <h2><span data-en="Referred out">បញ្ជូនចេញ</span><span class="tot" id="t_ref">0</span></h2>
+    <div class="grid w">
+      <div class="lvl"><h3>CPA 2</h3>
+        <label class="cy"><span data-en="Yellow">លឿង</span><input class="num" name="cpa2Y" inputmode="numeric"></label>
+        <label class="cr"><span data-en="Red">ក្រហម</span><input class="num" name="cpa2R" inputmode="numeric"></label>
+        <label><span data-en="Other">ផ្សេងៗ</span><input class="num" name="cpa2O" inputmode="numeric"></label></div>
+      <div class="lvl"><h3>CPA 3</h3>
+        <label class="cy"><span data-en="Yellow">លឿង</span><input class="num" name="cpa3Y" inputmode="numeric"></label>
+        <label class="cr"><span data-en="Red">ក្រហម</span><input class="num" name="cpa3R" inputmode="numeric"></label>
+        <label><span data-en="Other">ផ្សេងៗ</span><input class="num" name="cpa3O" inputmode="numeric"></label></div>
+      <div class="lvl"><h3 data-en="National Hospital">មន្ទីរពេទ្យជាតិ</h3>
+        <label class="cy"><span data-en="Yellow">លឿង</span><input class="num" name="natY" inputmode="numeric"></label>
+        <label class="cr"><span data-en="Red">ក្រហម</span><input class="num" name="natR" inputmode="numeric"></label>
+        <label><span data-en="Other">ផ្សេងៗ</span><input class="num" name="natO" inputmode="numeric"></label></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span data-en="Received for continued care (referred out)">ទទួលថែទាំបន្ត (បញ្ជូនចេញ)</span><span class="tot" id="t_cont">0</span></h2>
+    <div class="grid">
+      <label class="cy"><span data-en="Yellow">លឿង</span><input class="num" name="contY" inputmode="numeric"></label>
+      <label class="cr"><span data-en="Red">ក្រហម</span><input class="num" name="contR" inputmode="numeric"></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span data-en="Continued follow-up">តាមដានបន្ត</span><span class="tot" id="t_fu">0</span></h2>
+    <div class="grid">
+      <label class="cy"><span data-en="Yellow">លឿង</span><input class="num" name="fuY" inputmode="numeric"></label>
+      <label class="cr"><span data-en="Red">ក្រហម</span><input class="num" name="fuR" inputmode="numeric"></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="grid w">
+      <label><span data-en="Report date">ថ្ងៃ ខែ ឆ្នាំ</span> <b class="req">*</b><input type="date" name="reportDate" required></label>
+      <label><span data-en="Reported by">អ្នកធ្វើរបាយការណ៍</span> <b class="req">*</b><input name="reporter" required></label>
+    </div>
+    <label style="margin-top:10px"><span data-en="Remark">កំណត់សម្គាល់</span><textarea name="remark" rows="2"></textarea></label>
+  </section>
+
+  <div class="btns">
+    <button class="b" type="submit" id="saveBtn" data-en="Save report">រក្សាទុករបាយការណ៍</button>
+    <button class="b alt" type="button" id="resetBtn" data-en="Clear">សម្អាត</button>
+    <span id="editTag" class="pend hide" style="align-self:center;font-size:13px"></span>
+  </div>
+</form>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="viewDash" class="hide">
+  <section class="card">
+    <div class="grid w">
+      <label><span data-en="Month">ខែ</span><input type="month" id="fMonth"></label>
+      <label><span data-en="OD / facility search">ស្វែងរក ស្រុកប្រតិបត្តិ / មូលដ្ឋាន</span><input id="fText"></label>
+    </div>
+    <div class="btns" style="margin-top:10px">
+      <button class="b alt" id="refreshBtn" data-en="Refresh">ទាញទិន្នន័យថ្មី</button>
+      <button class="b alt" id="xlsBtn" data-en="Export Excel">ទាញយក Excel</button>
+    </div>
+  </section>
+  <div class="stats" id="stats"></div>
+  <section class="card"><div class="tw"><table id="tbl"></table></div></section>
+</div>
+</main>
+
+<div id="printArea"></div>
+<div id="toast"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const API = 'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';   // .../exec
+const LOGO_URL = '';                                  // e.g. 'logo.png' in the same repo
+const DEFAULT_PHD = 'មន្ទីរសុខាភិបាលខេត្តកំពង់ឆ្នាំង';
+const OD_LIST = ['ស្រុកប្រតិបត្តិកំពង់ឆ្នាំង','ស្រុកប្រតិបត្តិកំពង់ត្រឡាច','ស្រុកប្រតិបត្តិបរិបូណ៌'];
+const NS = 'ancrpt_';                                 // storage namespace
+/* ========================================== */
+
+const NUMS = ['anc1','anc2','anc3','anc4','ancOut','green','yellow','red','cpa2Y','cpa2R','cpa2O','cpa3Y','cpa3R','cpa3O','natY','natR','natO','contY','contR','fuY','fuR'];
+const TEXTS = ['phd','od','facility','period','reportDate','reporter','remark'];
+const $ = s => document.querySelector(s);
+const f = $('#f');
+const apiReady = /^https:\/\/script\.google\.com\//.test(API);
+let lang = localStorage.getItem(NS+'lang') || 'km';
+let records = load('records', []);
+let outbox = load('outbox', []);
+let editId = null;
+
+function load(k, d){ try{ return JSON.parse(localStorage.getItem(NS+k)) || d; }catch(e){ return d; } }
+function store(k, v){ try{ localStorage.setItem(NS+k, JSON.stringify(v)); }catch(e){} }
+const T = (km, en) => lang === 'km' ? km : en;
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toArabic = s => String(s).replace(/[០-៩]/g, d => '០១២៣៤៥៦៧៨៩'.indexOf(d)).replace(/\D/g, '');
+const toKhmer = s => String(s).replace(/\d/g, d => '០១២៣៤៥៦៧៨៩'[d]);
+const n = v => parseInt(v, 10) || 0;
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2400); }
+
+/* ---------- language ---------- */
+document.querySelectorAll('[data-en]').forEach(el => el.dataset.km = el.textContent);
+function applyLang(){
+  document.querySelectorAll('[data-en]').forEach(el => el.textContent = lang === 'km' ? el.dataset.km : el.dataset.en);
+  $('#langBtn').textContent = lang === 'km' ? 'EN' : 'ខ្មែរ';
+  document.documentElement.lang = lang;
+  $('#hdSub').textContent = T('ទម្រង់ឌីជីថល', 'Digital form');
+  banners(); calc(); renderDash();
+}
+$('#langBtn').onclick = () => { lang = lang === 'km' ? 'en' : 'km'; localStorage.setItem(NS+'lang', lang); applyLang(); };
+
+/* ---------- tabs ---------- */
+function tab(which){
+  $('#viewForm').classList.toggle('hide', which !== 'form');
+  $('#viewDash').classList.toggle('hide', which !== 'dash');
+  $('#tabForm').classList.toggle('on', which === 'form');
+  $('#tabDash').classList.toggle('on', which === 'dash');
+  if (which === 'dash') { renderDash(); refresh(false); }
+}
+$('#tabForm').onclick = () => tab('form');
+$('#tabDash').onclick = () => tab('dash');
+
+/* ---------- form logic ---------- */
+function totals(r){
+  return {
+    ancTotal: n(r.anc1)+n(r.anc2)+n(r.anc3)+n(r.anc4)+n(r.ancOut),
+    colTotal: n(r.green)+n(r.yellow)+n(r.red),
+    refTotal: n(r.cpa2Y)+n(r.cpa2R)+n(r.cpa2O)+n(r.cpa3Y)+n(r.cpa3R)+n(r.cpa3O)+n(r.natY)+n(r.natR)+n(r.natO),
+    contTotal: n(r.contY)+n(r.contR),
+    fuTotal: n(r.fuY)+n(r.fuR)
+  };
+}
+function readForm(){
+  const r = {};
+  TEXTS.forEach(k => r[k] = f.elements[k].value.trim());
+  NUMS.forEach(k => r[k] = n(f.elements[k].value));
+  return Object.assign(r, totals(r));
+}
+function calc(){
+  const r = readForm();
+  $('#t_anc').textContent = r.ancTotal; $('#t_col').textContent = r.colTotal;
+  $('#t_ref').textContent = r.refTotal; $('#t_cont').textContent = r.contTotal; $('#t_fu').textContent = r.fuTotal;
+  const h = $('#colHint'), bad = r.colTotal > 0 && r.colTotal !== r.ancTotal;
+  h.style.display = bad ? 'block' : 'none';
+  h.textContent = T('សរុបកូដពណ៌ ('+r.colTotal+') មិនស្មើនឹង ANC សរុប ('+r.ancTotal+') — សូមពិនិត្យឡើងវិញ (នៅតែអាចរក្សាទុកបាន)',
+                    'Colour-code total ('+r.colTotal+') differs from total ANC ('+r.ancTotal+') — please check (you can still save)');
+}
+NUMS.forEach(k => f.elements[k].addEventListener('input', e => { e.target.value = toArabic(e.target.value); calc(); }));
+
+function resetForm(){
+  f.reset(); editId = null; $('#editTag').classList.add('hide');
+  const last = load('unit', {});
+  f.elements.phd.value = last.phd || DEFAULT_PHD;
+  f.elements.od.value = last.od || '';
+  f.elements.facility.value = last.facility || '';
+  f.elements.reporter.value = last.reporter || '';
+  const d = new Date(), iso = new Date(d - d.getTimezoneOffset()*60000).toISOString();
+  f.elements.reportDate.value = iso.slice(0,10);
+  f.elements.period.value = iso.slice(0,7);
+  calc();
+}
+$('#resetBtn').onclick = resetForm;
+
+f.addEventListener('submit', e => {
+  e.preventDefault();
+  const r = readForm();
+  const dup = records.find(x => x.id !== editId && x.period === r.period && x.facility === r.facility && x.od === r.od);
+  if (dup && !confirm(T('មានរបាយការណ៍របស់មូលដ្ឋាននេះសម្រាប់ខែនេះរួចហើយ។ រក្សាទុកមួយទៀតឬ?', 'A report for this facility and month already exists. Save another one?'))) return;
+  r.id = editId || ('A' + Date.now().toString(36) + Math.random().toString(36).slice(2,6));
+  r.savedAt = new Date().toISOString();
+  const i = records.findIndex(x => x.id === r.id);
+  if (i >= 0) records[i] = r; else records.unshift(r);
+  store('records', records);
+  store('unit', {phd:r.phd, od:r.od, facility:r.facility, reporter:r.reporter});
+  queue({type:'save', id:r.id, rec:r});
+  toast(T('បានរក្សាទុក ✓', 'Saved ✓'));
+  resetForm(); window.scrollTo(0,0);
+});
+
+/* ---------- backend (GET-only JSONP) ---------- */
+function jsonp(params){
+  return new Promise((res, rej) => {
+    const cb = 'cb' + Date.now() + Math.floor(Math.random()*1e5), s = document.createElement('script');
+    const done = () => { clearTimeout(t); delete window[cb]; s.remove(); };
+    const t = setTimeout(() => { done(); rej(new Error('timeout')); }, 20000);
+    window[cb] = d => { done(); res(d); };
+    s.onerror = () => { done(); rej(new Error('network')); };
+    s.src = API + '?' + new URLSearchParams(Object.assign({}, params, {callback: cb}));
+    document.head.appendChild(s);
+  });
+}
+function queue(job){
+  outbox = outbox.filter(j => j.id !== job.id);   // newest action for a record wins
+  outbox.push(job); store('outbox', outbox); banners(); flush();
+}
+let flushing = false;
+async function flush(){
+  if (!apiReady || flushing || !outbox.length || !navigator.onLine) return;
+  flushing = true;
+  try {
+    while (outbox.length) {
+      const j = outbox[0];
+      const res = await jsonp(j.type === 'save' ? {action:'save', data: JSON.stringify(j.rec)} : {action:'delete', id: j.id});
+      if (!res || !res.ok) throw new Error(res && res.error || 'failed');
+      outbox = outbox.filter(x => x !== j); store('outbox', outbox);
+    }
+  } catch (e) { /* stays queued, retried later */ }
+  flushing = false; banners(); renderDash();
+}
+window.addEventListener('online', flush);
+setInterval(flush, 30000);
+
+async function refresh(showToast){
+  if (!apiReady) return;
+  await flush();
+  if (outbox.length) return;                     // never overwrite unsent local work
+  try {
+    const res = await jsonp({action:'list'});
+    if (res && res.ok) {
+      records = res.rows.map(r => { NUMS.forEach(k => r[k] = n(r[k])); return Object.assign(r, totals(r)); })
+                        .sort((a,b) => (b.period+b.savedAt).localeCompare(a.period+a.savedAt));
+      store('records', records); renderDash();
+      if (showToast) toast(T('ទិន្នន័យថ្មីបំផុត ✓', 'Up to date ✓'));
+    }
+  } catch (e) { if (showToast) toast(T('មិនអាចភ្ជាប់បាន — បង្ហាញទិន្នន័យក្នុងឧបករណ៍', 'Offline — showing saved data')); }
+}
+$('#refreshBtn').onclick = () => refresh(true);
+
+function banners(){
+  const c = $('#cfgBanner'), o = $('#outBanner');
+  c.className = 'banner' + (apiReady ? '' : ' warn');
+  c.textContent = T('មិនទាន់ភ្ជាប់ Google Sheet — ទិន្នន័យរក្សាទុកតែក្នុងឧបករណ៍នេះ។', 'Backend URL not set — data is stored on this device only.');
+  o.className = 'banner' + (apiReady && outbox.length ? ' info' : '');
+  o.textContent = T('កំពុងរង់ចាំបញ្ជូន៖ ' + outbox.length, 'Waiting to sync: ' + outbox.length);
+}
+
+/* ---------- dashboard ---------- */
+function filtered(){
+  const m = $('#fMonth').value, q = $('#fText').value.trim().toLowerCase();
+  return records.filter(r => (!m || r.period === m) && (!q || (r.od + ' ' + r.facility).toLowerCase().includes(q)));
+}
+function renderDash(){
+  const rows = filtered(), sum = k => rows.reduce((a, r) => a + n(r[k]), 0);
+  const cards = [['', rows.length, T('របាយការណ៍','Reports')], ['', sum('ancTotal'), T('ANC សរុប','Total ANC')],
+    ['g', sum('green'), T('បៃតង','Green')], ['y', sum('yellow'), T('លឿង','Yellow')], ['r', sum('red'), T('ក្រហម','Red')],
+    ['', sum('refTotal'), T('បញ្ជូនចេញ','Referred out')], ['', sum('contTotal'), T('ទទួលថែទាំបន្ត','Continued care')], ['', sum('fuTotal'), T('តាមដានបន្ត','Follow-up')]];
+  $('#stats').innerHTML = cards.map(c => '<div class="stat '+c[0]+'"><b>'+c[1]+'</b><span>'+esc(c[2])+'</span></div>').join('');
+  const pending = new Set(outbox.map(j => j.id));
+  let h = '<tr><th>'+T('ខែ','Month')+'</th><th class="l">'+T('មូលដ្ឋាន','Facility')+'</th><th>ANC</th><th class="cg">'+T('បៃតង','G')+'</th><th class="cy">'+T('លឿង','Y')+'</th><th class="cr">'+T('ក្រហម','R')+'</th><th>'+T('បញ្ជូន','Ref.')+'</th><th>'+T('ថែទាំបន្ត','Cont.')+'</th><th>'+T('តាមដាន','F/U')+'</th><th></th></tr>';
+  h += rows.map(r => '<tr><td>'+esc(r.period)+'</td><td class="l">'+esc(r.facility)+'<br><small>'+esc(r.od)+'</small>'+(pending.has(r.id) ? '<span class="pend">⏳</span>' : '')+'</td><td><b>'+r.ancTotal+'</b></td><td>'+r.green+'</td><td>'+r.yellow+'</td><td>'+r.red+'</td><td>'+r.refTotal+'</td><td>'+r.contTotal+'</td><td>'+r.fuTotal+'</td>'
+    + '<td><button class="b alt sm" data-a="print" data-id="'+esc(r.id)+'">'+T('បោះពុម្ព','Print')+'</button> <button class="b alt sm" data-a="edit" data-id="'+esc(r.id)+'">'+T('កែ','Edit')+'</button> <button class="b del sm" data-a="del" data-id="'+esc(r.id)+'">'+T('លុប','Delete')+'</button></td></tr>').join('');
+  if (!rows.length) h += '<tr><td colspan="10" style="padding:22px;color:#5d736e">'+T('មិនទាន់មានរបាយការណ៍','No reports yet')+'</td></tr>';
+  $('#tbl').innerHTML = h;
+}
+$('#fMonth').oninput = renderDash; $('#fText').oninput = renderDash;
+$('#tbl').addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const r = records.find(x => x.id === b.dataset.id); if (!r) return;
+  if (b.dataset.a === 'print') printRec(r);
+  if (b.dataset.a === 'edit') {
+    TEXTS.forEach(k => f.elements[k].value = r[k] || ''); NUMS.forEach(k => f.elements[k].value = r[k] || '');
+    editId = r.id; const t = $('#editTag'); t.textContent = T('កំពុងកែ៖ ', 'Editing: ') + r.facility + ' ' + r.period; t.classList.remove('hide');
+    calc(); tab('form'); window.scrollTo(0,0);
+  }
+  if (b.dataset.a === 'del' && confirm(T('លុបរបាយការណ៍នេះមែនទេ?', 'Delete this report?'))) {
+    records = records.filter(x => x.id !== r.id); store('records', records);
+    queue({type:'delete', id: r.id}); renderDash();
+  }
+});
+
+/* ---------- Excel (SheetJS, client-side) ---------- */
+$('#xlsBtn').onclick = () => {
+  const rows = filtered(); if (!rows.length) return toast(T('គ្មានទិន្នន័យ', 'No data'));
+  const cols = [['period','ខែ / Month'],['phd','មន្ទីរសុខាភិបាលខេត្ត / PHD'],['od','ស្រុកប្រតិបត្តិ / OD'],['facility','មូលដ្ឋាន / Facility'],
+    ['ancTotal','ANC សរុប / Total'],['anc1','ANC 1'],['anc2','ANC 2'],['anc3','ANC 3'],['anc4','ANC 4'],['ancOut','ក្រៅការកំណត់ / Outside schedule'],
+    ['green','បៃតង / Green'],['yellow','លឿង / Yellow'],['red','ក្រហម / Red'],['refTotal','បញ្ជូនចេញ / Referred out'],
+    ['cpa2Y','CPA2 លឿង'],['cpa2R','CPA2 ក្រហម'],['cpa2O','CPA2 ផ្សេងៗ'],['cpa3Y','CPA3 លឿង'],['cpa3R','CPA3 ក្រហម'],['cpa3O','CPA3 ផ្សេងៗ'],
+    ['natY','National លឿង'],['natR','National ក្រហម'],['natO','National ផ្សេងៗ'],
+    ['contTotal','ទទួលថែទាំបន្ត / Continued care'],['contY','ថែទាំបន្ត លឿង'],['contR','ថែទាំបន្ត ក្រហម'],
+    ['fuTotal','តាមដានបន្ត / Follow-up'],['fuY','តាមដាន លឿង'],['fuR','តាមដាន ក្រហម'],
+    ['reportDate','ថ្ងៃរាយការណ៍ / Report date'],['reporter','អ្នកធ្វើរបាយការណ៍ / Reporter'],['remark','កំណត់សម្គាល់ / Remark']];
+  const aoa = [cols.map(c => c[1])].concat(rows.map(r => cols.map(c => r[c[0]] == null ? '' : r[c[0]])));
+  const ws = XLSX.utils.aoa_to_sheet(aoa); ws['!cols'] = cols.map(() => ({wch: 16}));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'ANC');
+  XLSX.writeFile(wb, 'ANC_Report_' + ($('#fMonth').value || 'all') + '.xlsx');
+};
+
+/* ---------- print / PDF (same layout as the paper form) ---------- */
+function printRec(r){
+  const v = x => '<span class="v">' + toKhmer(n(x)) + '</span>';
+  const d = (r.reportDate || '').split('-');
+  const months = ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
+  const p = (r.period || '').split('-');
+  const lvl = (y, rr, o) => 'លឿង៖ ' + v(y) + '<br>ក្រហម៖ ' + v(rr) + '<br>ផ្សេងៗ៖ ' + v(o);
+  $('#printArea').innerHTML =
+    '<h1>របាយការណ៍ថែទាំផ្ទៃពោះ</h1>' +
+    '<div class="hd">' + esc(r.phd) + '</div>' +
+    '<div><i>' + esc(r.od) + '</i> &nbsp; ' + esc(r.facility) + '</div>' +
+    (p.length === 2 ? '<div>ប្រចាំខែ ' + months[p[1]-1] + ' ឆ្នាំ ' + toKhmer(p[0]) + '</div>' : '') +
+    '<div>ថែទាំផ្ទៃពោះសរុប ANC ៖ ' + v(r.ancTotal) + '</div>' +
+    '<div>ANC 1៖ ' + v(r.anc1) + ' ANC 2៖ ' + v(r.anc2) + ' ANC 3៖ ' + v(r.anc3) + ' ANC 4៖ ' + v(r.anc4) + ' ក្រៅការកំណត់៖ ' + v(r.ancOut) + '</div>' +
+    '<div>កូដពណ៌៖</div><ul><li>បៃតង៖ ' + v(r.green) + '</li><li>លឿង៖ ' + v(r.yellow) + '</li><li>ក្រហម៖ ' + v(r.red) + '</li></ul>' +
+    '<div>បញ្ជូនចេញ៖ ' + v(r.refTotal) + '</div>' +
+    '<table><tr><th>CPA 2</th><th>CPA 3</th><th>National Hospital</th></tr><tr><td>' + lvl(r.cpa2Y, r.cpa2R, r.cpa2O) + '</td><td>' + lvl(r.cpa3Y, r.cpa3R, r.cpa3O) + '</td><td>' + lvl(r.natY, r.natR, r.natO) + '</td></tr></table>' +
+    '<div>ទទួលថែទាំបន្ត (បញ្ជូនចេញ)៖ ' + v(r.contTotal) + '</div><ul><li>លឿង៖ ' + v(r.contY) + '</li><li>ក្រហម៖ ' + v(r.contR) + '</li></ul>' +
+    '<div>តាមដានបន្ត៖ ' + v(r.fuTotal) + '</div><ul><li>លឿង៖ ' + v(r.fuY) + '</li><li>ក្រហម៖ ' + v(r.fuR) + '</li></ul>' +
+    (r.remark ? '<div>កំណត់សម្គាល់៖ ' + esc(r.remark) + '</div>' : '') +
+    '<div class="sig">' + (d.length === 3 ? 'ថ្ងៃទី ' + toKhmer(d[2]) + ' ខែ ' + months[d[1]-1] + ' ឆ្នាំ ' + toKhmer(d[0]) : 'ថ្ងៃ ខែ ឆ្នាំ') +
+    '<br>អ្នកធ្វើរបាយការណ៍<br><br><br>' + esc(r.reporter) + '</div>';
+  setTimeout(() => window.print(), 150);
+}
+
+/* ---------- init ---------- */
+$('#odList').innerHTML = OD_LIST.map(o => '<option value="' + esc(o) + '">').join('');
+if (LOGO_URL) $('#logo').src = LOGO_URL; else $('#logo').style.display = 'none';
+resetForm(); applyLang(); flush();
+</script>
+</body>
+</html>
